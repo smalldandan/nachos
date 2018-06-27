@@ -34,6 +34,24 @@ const int STACK_FENCEPOST = 0xdedbeef;
 //----------------------------------------------------------------------
 
 Thread::Thread(char* threadName)
+//这个是thread类的构造函数，入口参数是线程名，无返回值
+//函数流程 
+//threadnumEmpty()->P();
+//name = threadNum;
+//stackTop = NULL;
+//stack = NULL;
+//status = JUST_CREATED;
+// #ifdef USER_PROGRAM
+// space = NULL；
+// #endif
+// priority = CreatePriority;
+// mailList = new List;
+// threadnumMutex ->  P();
+// threadCount++;
+// totalThread++;
+// threadID = threadCount;
+// threadnumMutex _> V();
+// threadnumMutex_>V(); 
 {
     name = threadName;
     stackTop = NULL;
@@ -60,6 +78,10 @@ Thread::Thread(char* threadName)
 //----------------------------------------------------------------------
 
 Thread::~Thread()
+//析构函数
+//函数流程：
+//threadnumFull -> P();
+//threadnumEmpty -> V();
 {
     DEBUG(dbgThread, "Deleting thread: " << name);
 
@@ -239,6 +261,8 @@ Thread::Yield ()
 void
 Thread::Sleep (bool finishing)
 {
+    //需要增加修改线程优先级的步骤，即给priority成员变量赋BlockedPriority值
+
     Thread *nextThread;
     
     ASSERT(this == kernel->currentThread);
@@ -265,6 +289,7 @@ Thread::Sleep (bool finishing)
 static void ThreadFinish()    { kernel->currentThread->Finish(); }
 static void ThreadBegin() { kernel->currentThread->Begin(); }
 void ThreadPrint(Thread *t) { t->Print(); }
+//需要新加一个函数Print，显示当前的线程好，线程名，优先级；
 
 #ifdef PARISC
 
@@ -433,4 +458,52 @@ Thread::SelfTest()
     kernel->currentThread->Yield();
     SimpleThread(0);
 }
+
+// 增加函数SendMail()；
+// 入口参数： int --接收者线程号， char* --消息
+// 返回值：无
+// 函数流程：
+// 1 给空信箱信号量架p操作
+// 2 给信息发送信号量加p操作
+// 3 发送消息
+// 4 给消息发送信号量加v操作
+
+// 增加函数ReceiveMail();
+// 入口参数: char* --消息
+// 返回值: 无
+// 函数流程
+// 1 如果信箱为空,则出错退出
+// 2 把信从信箱中移除
+// 3 收信
+// 4 给空信箱信号量加V操作
+
+// 增加函数TransportMail --Thread的外部函数
+// 功能描述:送信的过程
+// 入口参数:int -- 发送者的线程号 int --收信者的线程号 char* 消息
+// 返回值:无
+// 函数流程:
+// 1 找出空箱的号码
+// 2 计算该信箱的首地址
+// 3 写信息
+// 4 更新信箱里的数据
+// 5 留下发送记录
+// 6 将该信箱号码传给接收者线程
+
+// 4)增加函数AcceptMail ————Thread的外部函数
+// 功能描述：收信的过程。 
+// 入口参数：int ――信箱号。 
+// char* ――消息内容。 
+// 返回值：无 
+// 函数流程： 
+// 1，如果信箱为空，出错退出。
+// 2，计算首地址 
+// 3，读出消息内容 
+// 4，留下接收记录 
+
+// 5)增加函数FindBlankBox ——Thread的外部函数
+// 功能描述：查找可用信箱。 
+// 入口参数：无 
+// 返回值：int――可用信箱号。 
+// 函数流程： 
+// 顺序查找信箱数组，判断是否有信箱为空。如果找到可用信箱，返回其编号，否则返回-1. 
 

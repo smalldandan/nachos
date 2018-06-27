@@ -93,6 +93,9 @@ Kernel::Initialize()
     currentThread = new Thread("main");		
     currentThread->setStatus(RUNNING);
 
+
+    //添加初始化变量threadnumMutex,threadnumEmpty,threadnumFull,threadcount的步骤
+
     stats = new Statistics();		// collect statistics
     interrupt = new Interrupt;		// start up interrupt handling
     scheduler = new Scheduler();	// initialize the ready queue
@@ -241,5 +244,10 @@ Kernel::NetworkTest() {
     }
 
     // Then we're done!
+// 增加函数TimerInterruptHandler
+// 功能：处理时钟中断。
+// 入口参数：int dummy  返回值：无
+// 函数流程：对就绪队列中的所有线程进行优先级调整
+
 }
 

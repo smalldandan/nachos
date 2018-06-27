@@ -55,6 +55,10 @@ Scheduler::~Scheduler()
 
 void
 Scheduler::ReadyToRun (Thread *thread)
+//作用;将指定线程加入就绪队列
+//函数流程：
+// 1、将线程状态改为就绪态
+// 2、用插入排序法根据优先级排序就绪队列中的线程
 {
     ASSERT(kernel->interrupt->getLevel() == IntOff);
     DEBUG(dbgThread, "Putting thread on ready list: " << thread->getName());
@@ -73,6 +77,12 @@ Scheduler::ReadyToRun (Thread *thread)
 
 Thread *
 Scheduler::FindNextToRun ()
+// 功能：返回下一个要运行的线程给CPU
+// 函数流程：
+// 根据当前线程的状态来判断调用该函数的原因，分两种情况：
+// 1、当睡眠时，简单的将就绪队列中的第一个元素（其优先级最高）取出来返回
+// 2、当运行时，此情况为时钟中断所引起的线程调度要求，此时先进性当前进程的优先级修改操作，然后于就绪队列中优先级最高的线程进行优先级的比较：
+// 若还是大，则返回NULL,不然返回新取出来的线程
 {
     ASSERT(kernel->interrupt->getLevel() == IntOff);
 
@@ -177,3 +187,27 @@ Scheduler::Print()
     cout << "Ready list contents:\n";
     readyList->Apply(ThreadPrint);
 }
+
+
+//增加一个函数FlushPriority();无入口参数，无返回值
+//readyList->Apply(Void Function Ptr UpdatePriority)
+//其中UpdatePriority是用来重新计算线程的优先级的
+
+
+// 9)Scheduler::HandleMail 
+// 功能描述： 处理信箱。 
+// 入口参数：int ――接收者线程号 
+// int ――信箱号 
+// 返回值：无 
+// 函数流程： 先将反映当前处理邮箱的成员变量currentmailbox和currentreceiver中写入相应数据，
+// currentboxstatus初始设置为RECYCLED。 之后利用List类的成员函数Mapcar,对就绪队列中的每个线程调用ReportToThread，
+// 结束之后，currentboxstatus还为RECYCLED，即没有找到接受者，则当作垃圾消息进行删除处理（ExportMail）。 
+
+
+
+// 10)ReportToThread ——Scheduler的外部函数
+// 功能描述：在当前线程消息队列中添加邮箱号码。 
+// 入口参数：int ――其实是Thread类，。 
+// 返回值：无 
+// 函数流程： 其操作对象为就绪队列中的各个线程。具体操作为： 对当前的线程ID与接受者ID进行比较，
+// 若符合则将当前线程的消息队列中添加该邮箱号码，并且将currentboxstate设置为FULLED
